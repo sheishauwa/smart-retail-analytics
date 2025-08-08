@@ -1,1 +1,38 @@
+---
+- hosts: ec2
+  become: yes
+  tasks:
+    - name: Install Python3 and pip
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Install AWS CLI
+      yum:
+        name: awscli
+        state: present
+
+    - name: Install Kaggle API
+      pip:
+        name: kaggle
+        executable: pip3
+
+    - name: Create .kaggle directory
+      file:
+        path: /home/ec2-user/.kaggle
+        state: directory
+        owner: ec2-user
+        mode: '0700'
+
+    - name: Upload kaggle.json
+      copy:
+        src: ./kaggle.json
+        dest: /home/ec2-user/.kaggle/kaggle.json
+        owner: ec2-user
+        mode: '0600'
+
+    - name: Run ingestion script
+      command: python3 /home/ec2-user/ingest_to_s3.py
 
